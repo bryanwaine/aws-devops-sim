@@ -50,7 +50,7 @@ jobs:
         run: |
           aws ssm wait command-executed \
             --command-id "${{ steps.send-command.outputs.command_id }}" \
-            --instance-id "${{ steps.find-instance.outputs.instance_id }}"
+            --instance-id "${{ steps.find-instance.outputs.instance_id }}" || true
 
           # Retrieve status and logs, storing status in a variable
           RESPONSE=$(aws ssm get-command-invocation \
