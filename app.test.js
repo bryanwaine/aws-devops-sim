@@ -2,7 +2,7 @@ const request = require("supertest");
 const app = require("./app");
 
 describe("Get /health", () => {
-  it("should return 200 OK and status OK", async () => {
+  it("should return status code 200 and status OK", async () => {
     const response = await request(app).get("/health");
 
     expect(response.statusCode).toBe(200);
