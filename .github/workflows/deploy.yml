@@ -42,7 +42,7 @@ jobs:
             --instance-ids "${{ steps.find-instance.outputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
-              "if [ ! -d /home/ec2-user/app ]; then git clone https://github.com/your-org/your-repo.git /home/ec2-user/app; fi",
+              "if [ ! -d /home/ec2-user/app ]; then git clone https://github.com/bryanwaine/aws-devops-sim /home/ec2-user/app; fi",
               "cd /home/ec2-user/app && git pull origin main && npm ci && pm2 restart app || pm2 start app.js --name app"
             ]' \
             --query "Command.CommandId" \
