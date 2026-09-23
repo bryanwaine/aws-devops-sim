@@ -1,7 +1,7 @@
 {
   "name": "aws-devops-sim",
   "version": "1.0.0",
-  "description": "",
+  "description": "A simple web server with a health check endpoint",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
