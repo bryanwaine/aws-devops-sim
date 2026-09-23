@@ -6,6 +6,6 @@ describe("Get /health status", () => {
     const response = await request(app).get("/health");
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toEqual({ status: "OK" });
+    expect(response.body).toEqual({ status: "Healthy" });
   });
 });
