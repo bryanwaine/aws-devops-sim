@@ -6,9 +6,6 @@ terraform {
     }
   }
 }
-# Standard provider for London
-provider "aws" {
-  region = "eu-west-2"
-}
+
 
 
