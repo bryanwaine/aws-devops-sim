@@ -1,14 +1,16 @@
-terraform {
-  required_providers {
-    aws = {
-        source = "hashicorp/aws",
-        version = "~> 5.0"
-    }
-  }
+# Dev Environment
+module "dev" {
+  source           = "./modules/app-environment"
+  environment_name = "dev"
+  ami_id           = "ami-07524133e69bdba59"
+  subnet_id        = "subnet-0696dc1ea6f8ac6bf"
+  instance_type    = "t3.micro"
 }
-# Standard provider for London
-provider "aws" {
-  region = "eu-west-2"
+# Staging Environment
+module "staging" {
+  source           = "./modules/app-environment"
+  environment_name = "staging"
+  ami_id           = "ami-07524133e69bdba59"
+  subnet_id        = "subnet-0696dc1ea6f8ac6bf"
+  instance_type    = "t3.micro"
 }
-
-

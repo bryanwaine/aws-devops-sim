@@ -30,7 +30,7 @@ jobs:
         id: find-instance
         run: |
           INSTANCE_ID=$(aws ec2 describe-instances \
-            --filters "Name=tag:Environment,Values=dev-sim" "Name=instance-state-name,Values=running" \
+            --filters "Name=tag:Environment,Values=dev" "Name=instance-state-name,Values=running" \
             --query "Reservations[0].Instances[0].InstanceId" \
             --output text)
           echo "instance_id=$INSTANCE_ID" >> "$GITHUB_OUTPUT"
