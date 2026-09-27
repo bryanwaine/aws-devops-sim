@@ -4,22 +4,27 @@ variable "environment_name" {
 
 variable "instance_type" {
   description = "EC2 instance type"
-  type = string
-  default = "t3.micro"
+  type        = string
+  default     = "t3.micro"
 }
 
 variable "ami_id" {
   description = "AMI ID to launch"
-  type = string
+  type        = string
 }
 
 variable "subnet_id" {
   description = "Subnet to launch the instance into"
-  type = string
+  type        = string
 }
 
 variable "app_port" {
   description = "Port the application listens on"
-  type = number
-  default = 3000
+  type        = number
+  default     = 3000
+}
+
+variable "alert_email" {
+  description = "Email address to receive infrastructure alerts"
+  type        = string
 }
