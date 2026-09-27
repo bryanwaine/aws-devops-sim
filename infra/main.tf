@@ -16,7 +16,63 @@ module "staging" {
   instance_type    = "t3.micro"
   alert_email      = "hello@ashandwaine.photo"
 }
+# Environments Variable
+locals {
+  environments = ["dev", "staging"]
+}
+# GitHub Actions User
+resource "aws_iam_user" "github_actions_ci" {
+  name = "github-actions-ci"
 
+  tags = {
+    "Purpose" = "github-actions"
+  }
+}
+# IAM policy for GitHub Actions
+resource "aws_iam_policy" "github_actions_deploy" {
+  name        = "github-actions-deploy-policy"
+  description = "A policy scoped to listing tagged EC2 instances, sending SSM commands to a tagged instance using AWS-RunShellScript and checking SSM command status."
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "SendCommandToTaggedInstance"
+        Effect   = "Allow"
+        Action   = "ssm:SendCommand"
+        Resource = "arn:aws:ec2:eu-west-2:877973750220:instance/*"
+        Condition = {
+          StringEquals = {
+            "ssm:resourceTag/Environment" = local.environments
+          }
+        }
+      },
+      {
+        Sid      = "SendCommandDocument"
+        Effect   = "Allow"
+        Action   = "ssm:SendCommand"
+        Resource = "arn:aws:ssm:eu-west-2::document/AWS-RunShellScript"
+      },
+      {
+        Sid      = "CheckCommandStatus"
+        Effect   = "Allow"
+        Action   = "ssm:GetCommandInvocation"
+        Resource = "*"
+      },
+      {
+        Sid      = "LookupInstanceByTag"
+        Effect   = "Allow"
+        Action   = "ec2:DescribeInstances"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_user_policy_attachment" "deploy" {
+  user       = aws_iam_user.github_actions_ci.name
+  policy_arn = aws_iam_policy.github_actions_deploy.arn
+}
+# Combined Cloudwatch dashboard
 resource "aws_cloudwatch_dashboard" "main" {
   dashboard_name = "app-environments-overview"
 
@@ -29,9 +85,9 @@ resource "aws_cloudwatch_dashboard" "main" {
         width  = 12
         height = 6
         properties = {
-          title   = "CPU Utilization"
-          view    = "timeSeries"
-          region  = "eu-west-2"
+          title  = "CPU Utilization"
+          view   = "timeSeries"
+          region = "eu-west-2"
           metrics = [
             ["AWS/EC2", "CPUUtilization", "InstanceId", module.dev.instance_id, { label = "dev" }],
             ["AWS/EC2", "CPUUtilization", "InstanceId", module.staging.instance_id, { label = "staging" }]
@@ -47,9 +103,9 @@ resource "aws_cloudwatch_dashboard" "main" {
         width  = 12
         height = 6
         properties = {
-          title   = "Status Check Failures"
-          view    = "timeSeries"
-          region  = "eu-west-2"
+          title  = "Status Check Failures"
+          view   = "timeSeries"
+          region = "eu-west-2"
           metrics = [
             ["AWS/EC2", "StatusCheckFailed", "InstanceId", module.dev.instance_id, { label = "dev" }],
             ["AWS/EC2", "StatusCheckFailed", "InstanceId", module.staging.instance_id, { label = "staging" }]
