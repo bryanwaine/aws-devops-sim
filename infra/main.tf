@@ -117,3 +117,53 @@ resource "aws_cloudwatch_dashboard" "main" {
     ]
   })
 }
+# SNS topic
+resource "aws_sns_topic" "security_alerts" {
+  name = "manual-ssm-command-alerts"
+}
+
+resource "aws_sns_topic_subscription" "security_alerts_email" {
+  topic_arn = aws_sns_topic.security_alerts.arn
+  protocol  = "email"
+  endpoint  = "hello@ashandwaine.photo"
+}
+
+resource "aws_cloudwatch_event_rule" "manual_ssm_command" {
+  name        = "manual-ssm-send-command-detection"
+  description = "Fires when an SSM SendCommand call is made by anyone other than the CI automation user"
+
+  event_pattern = jsonencode({
+    source      = ["aws.ssm"]
+    detail-type = ["AWS API Call via CloudTrail"]
+    detail = {
+      eventSource = ["ssm.amazonaws.com"]
+      eventName   = ["SendCommand"]
+      userIdentity = {
+        arn = [{ "anything-but" = "arn:aws:iam::877973750220:user/github-actions-ci" }]
+      }
+    }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "notify_security_topic" {
+  rule      = aws_cloudwatch_event_rule.manual_ssm_command.name
+  target_id = "notify-sns"
+  arn       = aws_sns_topic.security_alerts.arn
+}
+
+resource "aws_sns_topic_policy" "allow_eventbridge_publish" {
+  arn = aws_sns_topic.security_alerts.arn
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowEventBridgePublish"
+        Effect    = "Allow"
+        Principal = { Service = "events.amazonaws.com" }
+        Action    = "SNS:Publish"
+        Resource  = aws_sns_topic.security_alerts.arn
+      }
+    ]
+  })
+}
